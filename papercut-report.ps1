@@ -19,7 +19,6 @@ Purpose/Change: Initial script development
 <Example goes here. Repeat this attribute for more than one example>:
 #>
 
-
 Function server-command {
     &'C:\Program Files\PaperCut MF\server\bin\win\server-command.exe' $Args
 }
@@ -44,6 +43,18 @@ $uri = [Uri]"http://localhost:9191/api/health"
 
   Write-Output "<p>Total Printers = $($rsp.printers.count)</p>"
   Write-Output "<p>Total Devices = $($rsp.devices.count)</p>"
- } | Out-File -FilePath .\report1.html
 
- Invoke-Expression .\report1.html
+  if (Get-Service 'Epson Open Platform Solution for PaperCut' -ErrorAction SilentlyContinue) {
+
+    $epsonErrCount = (Select-String -Path c:\tmp\epsonOPS.log -Pattern error | Measure-Object).count
+
+    if ($epsonErrCount -gt 0) {
+        write-output "<p>Epson plugin has reported $epsonErrCount errors</p>"
+    } else {
+        write-output "<p>Epson plugin reports no errors</p>"
+    }
+
+  }
+} | Out-File -FilePath .\report1.html
+
+invoke-expression .\report1.html
